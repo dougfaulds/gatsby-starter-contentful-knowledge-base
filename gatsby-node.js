@@ -24,6 +24,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
           category: kbAppCategory {
             slug
           }
+          link
         }
       }
     }
@@ -60,4 +61,9 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
       },
     });
   });
+};
+exports.onCreateWebpackConfig = ({ actions }) => {
+  actions.setWebpackConfig({
+    devtool: 'eval-source-map',
+  })
 };

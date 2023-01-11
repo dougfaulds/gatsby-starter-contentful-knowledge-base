@@ -29,6 +29,7 @@ module.exports = {
                   category: kbAppCategory {
                     slug
                   }
+                  link
                 }
               }
             }

@@ -1,7 +1,7 @@
 import React from 'react';
 import is from 'prop-types';
-import { graphql } from 'gatsby';
-import { BLOCKS } from '@contentful/rich-text-types';
+import { graphql, Link } from 'gatsby';
+import { INLINES, BLOCKS } from '@contentful/rich-text-types';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
 import styled from '@emotion/styled';
 import Layout from './layout';
@@ -12,8 +12,20 @@ import SEO from '../components/seo';
 const rendererOptions = ({ locale = 'en-US' }) => ({
   renderNode: {
     [BLOCKS.EMBEDDED_ASSET]: ({ data }) => {
+      
+      if (data.target.sys.type == 'Link') {
+        
+        return (
+          <p>Asset id: {data.target.sys.id}</p>
+          
+        )
+        
+        
+        ;}
+      
+      
       // check for assets only
-      if (data.target.sys.type !== 'Asset') return;
+      if (data.target.sys.linktype !== 'Asset') return;
 
       // check for images only
       if (data.target.fields.file[locale].contentType.startsWith('image')) {
@@ -24,7 +36,17 @@ const rendererOptions = ({ locale = 'en-US' }) => ({
           />
         );
       }
+
     },
+    [INLINES.HYPERLINK]: (node, children) => {
+      const { uri } = node.data
+      return (
+        <a href={uri} className="underline">
+          {children}
+        </a>
+      )
+    },
+
   },
 });
 
@@ -131,9 +153,22 @@ export default function Article(props) {
               props.data.article.body.json,
               rendererOptions({ locale: article.locale })
             )}
+            {props.data.article.link &&
+            
+              <p>Link: &nbsp;
+
+                <a href={props.data.article.link} target="_blank" >{props.data.article.link}</a>
+
+              </p>
+            
+            }
+            {props.data.article.link?.includes('https://scribehow.com/') &&
+              <iframe src={props.data.article.link} width="640" height="320" allowfullscreen frameborder="0"></iframe>
+            }
           </ArticleContentContainer>
         </WhiteContainer>
       </article>
+     
     </Layout>
   );
 }
@@ -151,6 +186,7 @@ Article.propTypes = {
       body: is.shape({
         json: is.any.isRequired,
       }).isRequired,
+      link: is.string.isRequired,
     }).isRequired,
   }).isRequired,
 };
@@ -169,6 +205,7 @@ export const query = graphql`
         name
       }
       locale: node_locale
+      link
     }
   }
 `;
